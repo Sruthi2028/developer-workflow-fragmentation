@@ -1,0 +1,9 @@
+activity_group,model,records,flagged_records,unflagged_records,flagged_rate_percent
+Low (2-5),Activity baseline,26226,0,26226,0.0
+Low (2-5),Extended model,26226,202,26024,0.7702
+Moderate (6-20),Activity baseline,4227,684,3543,16.1817
+Moderate (6-20),Extended model,4227,736,3491,17.4119
+High (21-50),Activity baseline,600,424,176,70.6667
+High (21-50),Extended model,600,246,354,41.0
+Very high (>50),Activity baseline,447,447,0,100.0
+Very high (>50),Extended model,447,386,61,86.3535

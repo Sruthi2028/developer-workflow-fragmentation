@@ -1,0 +1,39 @@
+# Python cache
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Local data and temporary files
+data/raw/
+data/processed/
+*.tmp
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor settings
+.vscode/
+
+# LaTeX temporary files
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# Large generated PDFs, if you do not intend to version them
+# Uncomment the next line only if PDFs should not be stored.
+# *.pdf

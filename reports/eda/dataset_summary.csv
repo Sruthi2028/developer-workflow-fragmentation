@@ -1,0 +1,9 @@
+metric,value
+Clean event records,311034
+Distinct actors in clean events,108666
+Distinct repositories in clean events,158960
+All actor-week records,108666
+Filtered actor-week records,31500
+Distinct actors in filtered data,31500
+Missing values in all actor-week features,0
+Missing values in filtered features,0

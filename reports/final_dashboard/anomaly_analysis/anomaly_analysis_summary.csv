@@ -1,0 +1,2 @@
+records_in_top_100_file,unique_actors,bot_like_name_records,other_name_records,score_pearson_correlation,mean_baseline_score,mean_extended_score
+100,100,34,66,0.40963564644150263,0.11462220460955919,0.1446052020950135

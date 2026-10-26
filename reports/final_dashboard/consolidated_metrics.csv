@@ -1,0 +1,42 @@
+# Source table 1
+model,feature_count,records,flagged_count,flagged_rate_pct,median_score,score_95th_percentile,features
+activity_baseline,3,31500,1555,4.936507936507936,-0.2108167681749828,0.0,"event_count, distinct_repositories, normalized_repo_entropy"
+temporal_only,3,31500,1550,4.920634920634921,-0.23682031509048457,0.0,"repository_transitions, transitions_per_observed_span_hour, short_horizon_reentry_rate"
+combined,6,31500,1570,4.984126984126984,-0.23644922213627273,0.0,"event_count, distinct_repositories, normalized_repo_entropy, repository_transitions, transitions_per_observed_span_hour, short_horizon_reentry_rate"
+
+# Source table 2
+records,flagged_count,flagged_fraction,score_mean,score_median,score_95th_percentile,model,features,contamination_parameter
+31500,1555,0.04936507936507936,-0.17537488432620157,-0.2108167681749828,0.0,baseline_isolation_forest,"event_count, distinct_repositories, normalized_repo_entropy",0.05
+31500,1570,0.04984126984126984,-0.19481734912697293,-0.23644922213627273,0.0,extended_isolation_forest,"event_count, distinct_repositories, normalized_repo_entropy, repository_transitions, transitions_per_observed_span_hour, short_horizon_reentry_rate",0.05
+
+# Source table 3
+contamination,records,flagged_count,flagged_rate_pct,median_anomaly_score,score_95th_percentile
+0.01,31500,315,1.0,-0.35529506004843875,-0.11847474495795418
+0.02,31500,601,1.9079365079365078,-0.32497775340102236,-0.0881574383105378
+0.05,31500,1550,4.920634920634921,-0.23682031509048457,0.0
+0.1,31500,3146,9.987301587301587,-0.17051722955247733,0.06630308553800723
+
+# Source table 4
+window_minutes,actor_week_records,records_with_nonzero_shrr,nonzero_shrr_rate_pct,mean_shrr,median_shrr,shrr_95th_percentile,mean_repository_transitions,mean_transition_intensity
+15,108666,569,0.5236228443119283,0.0017660502099381592,0.0,0.0,0.7933944380026872,0.20079332406000683
+30,108666,759,0.6984705427640661,0.0027388277088079764,0.0,0.0,0.7933944380026872,0.20079332406000683
+60,108666,910,0.8374284504812913,0.0034103677804439006,0.0,0.0,0.7933944380026872,0.20079332406000683
+120,108666,910,0.8374284504812913,0.0034103677804439006,0.0,0.0,0.7933944380026872,0.20079332406000683
+
+# Source table 5
+metric,value
+Clean event records,311034
+Distinct actors in clean events,108666
+Distinct repositories in clean events,158960
+All actor-week records,108666
+Filtered actor-week records,31500
+Distinct actors in filtered data,31500
+Missing values in all actor-week features,0
+Missing values in filtered features,0
+
+# Source table 6
+model_a,model_b,flagged_a,flagged_b,shared_flags,only_a,only_b,jaccard_overlap_pct
+activity_baseline,temporal_only,1555,1550,780,775,770,33.54838709677419
+activity_baseline,combined,1555,1570,1103,452,467,54.54995054401583
+temporal_only,combined,1550,1570,1246,304,324,66.48879402347919
+

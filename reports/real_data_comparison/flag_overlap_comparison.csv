@@ -1,0 +1,4 @@
+model_a,model_b,flagged_a,flagged_b,shared_flags,only_a,only_b,jaccard_overlap_pct
+activity_baseline,temporal_only,1555,1550,780,775,770,33.54838709677419
+activity_baseline,combined,1555,1570,1103,452,467,54.54995054401583
+temporal_only,combined,1550,1570,1246,304,324,66.48879402347919

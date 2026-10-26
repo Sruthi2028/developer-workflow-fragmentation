@@ -1,0 +1,3 @@
+records,flagged_count,flagged_fraction,score_mean,score_median,score_95th_percentile,model,features,contamination_parameter
+31500,1555,0.04936507936507936,-0.17537488432620157,-0.2108167681749828,0.0,baseline_isolation_forest,"event_count, distinct_repositories, normalized_repo_entropy",0.05
+31500,1570,0.04984126984126984,-0.19481734912697293,-0.23644922213627273,0.0,extended_isolation_forest,"event_count, distinct_repositories, normalized_repo_entropy, repository_transitions, transitions_per_observed_span_hour, short_horizon_reentry_rate",0.05

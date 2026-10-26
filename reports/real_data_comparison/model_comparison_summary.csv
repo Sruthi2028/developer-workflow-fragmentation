@@ -1,0 +1,4 @@
+model,feature_count,records,flagged_count,flagged_rate_pct,median_score,score_95th_percentile,features
+activity_baseline,3,31500,1555,4.936507936507936,-0.2108167681749828,0.0,"event_count, distinct_repositories, normalized_repo_entropy"
+temporal_only,3,31500,1550,4.920634920634921,-0.23682031509048457,0.0,"repository_transitions, transitions_per_observed_span_hour, short_horizon_reentry_rate"
+combined,6,31500,1570,4.984126984126984,-0.23644922213627273,0.0,"event_count, distinct_repositories, normalized_repo_entropy, repository_transitions, transitions_per_observed_span_hour, short_horizon_reentry_rate"
