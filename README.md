@@ -1,87 +1,199 @@
-# Developer Workflow Fragmentation — ML Theory Assessment
+# Beyond Commit Counts: Detecting Unusual Developer Workflow Fragmentation from Public GitHub Activity
 
-## Project status
-Starter implementation and proposal checkpoint created on 25 October 2026. **No real-data findings are claimed yet.** Run the pipeline and replace all report placeholders with measured results before submission.
+<p align="center">
+  <strong>An Exploratory Machine Learning Study of Repository-Switching Patterns</strong>
+</p>
 
-## Research focus
-**Working title:** Beyond Commit Counts: Detecting Unusual Developer Workflow Fragmentation from Public GitHub Activity
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.x-blue?logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/ML-Isolation%20Forest-orange" alt="Machine Learning">
+  <img src="https://img.shields.io/badge/Data-GH%20Archive-green" alt="GH Archive">
+  <img src="https://img.shields.io/badge/Paper-IEEE-red" alt="IEEE Paper">
+  <img src="https://img.shields.io/badge/Status-Research%20Prototype-purple" alt="Research Prototype">
+</p>
 
-This project studies observable public GitHub event sequences, not private work, cognitive load, exhaustion, or burnout. Public events are incomplete proxies for developers' actual work.
+## Overview
 
-### Research question
-Do temporal repository-switching features provide useful information beyond basic contribution counts and repository entropy when identifying unusual activity patterns in public GitHub event data?
+Developer activity is often summarized using simple measures such as event counts, commits, or the number of repositories involved. However, these measures do not fully describe the order in which activity occurs across repositories.
 
-### Proposed contributions to test
-1. Define a Short-Horizon Re-entry Rate (SHRR): the fraction of repository transitions that return to a repository observed recently within a chosen time window.
-2. Combine repository entropy, transition intensity, and SHRR into an exploratory Workflow Fragmentation Score (WFS).
-3. Compare a population-level anomaly detector with a per-developer historical baseline when enough history is available.
+This project investigates whether **repository-switching patterns provide additional information for identifying unusual public GitHub activity**.
 
-These are **candidate contributions**, not claims of global novelty. The literature review must be expanded before claiming originality.
+Using public GitHub event data, the study extracts activity-based and sequence-derived features and compares their behaviour under the unsupervised **Isolation Forest** algorithm.
 
-## Data
-The pipeline downloads hourly JSON archives from the OpenDigger GHArchive-compatible archive (`https://gharchive.open-digger.cn`). Its hourly archive is reported as available from 2026-09-06 onward. The original GH Archive documents the public-event dataset at `https://www.gharchive.org/`. Public-event coverage and completeness can vary; verify downloaded files and manifests and record missing hours. The archive does not record all developer actions, private repositories, local branch changes, or all task switches. The analysis therefore calls the measured behaviour *observed public-repository activity fragmentation*, not burnout or cognitive exhaustion.
+The project is an exploratory software repository mining study. Its purpose is to understand how different feature representations affect anomaly flags, rather than to infer developers' productivity, mental state, or working conditions.
 
-## Setup
-Python 3.10+ recommended.
+## Research Question
 
-```bash
-python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-# macOS/Linux:
-source .venv/bin/activate
-pip install -r requirements.txt
+**Do sequence-derived repository-switching features change which public GitHub activity records are flagged as unusual compared with a conventional activity-based baseline?**
+
+### Objectives
+
+* Examine activity distributed across multiple repositories.
+* Measure repository transitions and short-horizon repository re-entry.
+* Compare activity-based, temporal-only, and combined feature configurations.
+* Investigate the sensitivity of anomaly flags to model parameters.
+* Explore whether the selected records differ across feature configurations.
+
+## Methodology
+
+The research pipeline consists of the following stages:
+
+1. **Data collection:** Obtain selected public GitHub event archives from GH Archive.
+2. **Preprocessing:** Parse relevant event types, clean records, and remove duplicate events according to the project's preprocessing procedure.
+3. **Actor-week aggregation:** Group observed events by actor and week.
+4. **Feature engineering:** Calculate activity volume, repository diversity, repository transitions, transition intensity, and short-horizon re-entry.
+5. **Unsupervised modelling:** Apply Isolation Forest to three feature configurations.
+6. **Comparison:** Examine flag counts, overlap between flagged sets, feature relationships, and parameter sensitivity.
+7. **Interpretation:** Discuss the findings alongside sampling limitations and the absence of independently verified anomaly labels.
+
+## Feature Engineering
+
+| Feature                            | Description                                                                                                         |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Event count                        | Number of observed events associated with an actor-week                                                             |
+| Distinct repositories              | Number of different repositories observed                                                                           |
+| Normalized repository entropy      | Measures how activity is distributed across repositories                                                            |
+| Repository transitions             | Number of changes between consecutive observed repositories                                                         |
+| Transition intensity               | Repository transitions divided by the observed time span, with a minimum one-hour denominator                       |
+| Short-horizon re-entry rate (SHRR) | Proportion of repository transitions that return to a previously observed repository within a specified time window |
+
+These features describe public event sequences. They do not reveal why a repository switch occurred or whether it interrupted a developer's work.
+
+## Dataset
+
+The experiment used four selected GH Archive snapshots from **October 1, 2026**, corresponding to 00:00, 06:00, 12:00, and 18:00 UTC.
+
+| Dataset characteristic                              |   Count |
+| --------------------------------------------------- | ------: |
+| Raw event lines                                     | 329,310 |
+| Relevant events before deduplication and cleanup    | 312,125 |
+| Clean unique events                                 | 311,034 |
+| Distinct actors                                     | 108,666 |
+| Distinct repositories                               | 158,960 |
+| Actor-week records before filtering                 | 108,666 |
+| Actor-week records retained for the main comparison |  31,500 |
+
+The main comparison retained actor-week records containing at least two observed events.
+
+**Data limitation:** These four selected hourly snapshots do not represent continuous GitHub activity across the full day or week. Automated accounts were not comprehensively filtered, and the sample should be treated as sparse observational data.
+
+Dataset source: [GH Archive](https://www.gharchive.org/)
+
+## Experimental Results
+
+### Model Comparison
+
+The three Isolation Forest configurations were evaluated on the same 31,500 filtered actor-week records using a nominal contamination setting of 0.05.
+
+| Configuration     | Features                                                          | Flagged records | Flag rate |
+| ----------------- | ----------------------------------------------------------------- | --------------: | --------: |
+| Activity baseline | Event count, distinct repositories, normalized repository entropy |           1,555 |     4.94% |
+| Temporal-only     | Repository transitions, transition intensity, SHRR                |           1,550 |     4.92% |
+| Combined          | All six features                                                  |           1,570 |     4.98% |
+
+Although the flag rates were similar, the sets of flagged records overlapped only partially. The Jaccard similarity was 33.55% between the activity baseline and temporal-only configuration, 54.55% between the baseline and combined configuration, and 66.49% between the temporal-only and combined configurations.
+
+These results show that feature selection changes which records the model identifies as unusual. They do not establish that one configuration is more accurate.
+
+### Sensitivity Analysis
+
+The experiment also examined different contamination settings and short-horizon re-entry windows.
+
+* Increasing the contamination setting increased the number of flagged records.
+* The 60-minute and 120-minute re-entry windows produced the same number of records with nonzero SHRR in the reported analysis.
+* Several activity and transition features were strongly correlated, indicating redundancy in the feature representation.
+
+### Synthetic Benchmark
+
+A separate synthetic benchmark was used to check model behaviour on constructed activity patterns. The extended feature model achieved perfect scores on that synthetic test, while the activity baseline performed less strongly.
+
+These synthetic labels were constructed from the same patterns that the features were designed to measure. Therefore, the result is an implementation check, **not evidence of perfect real-world anomaly detection**.
+
+## Technologies Used
+
+* **Python** — data processing and feature engineering
+* **pandas** — event cleaning, aggregation, and analysis
+* **NumPy** — numerical computation
+* **scikit-learn** — Isolation Forest and evaluation
+* **Matplotlib** — experimental visualizations
+* **GH Archive** — public GitHub event data
+* **LaTeX / IEEE format** — research paper preparation
+* **Git and GitHub** — version control and project hosting
+
+## Repository Structure
+
+The repository is organized around the implementation, experiment outputs, and research paper.
+
+```text
+developer-workflow-fragmentation/
+├── data/
+│   ├── raw/                 # Local raw data; excluded from Git
+│   └── processed/           # Local processed data; excluded from Git
+├── src/                     # Source code, if organized separately
+├── results/                 # Selected experiment outputs
+├── paper/                   # IEEE paper and figures, if included
+├── README.md
+├── requirements.txt         # Python dependencies, if provided
+└── .gitignore
 ```
 
-## Run a small pilot
-Download a short date range. One day (24 archives) is a pilot, not enough for reliable per-developer weekly baselines.
+The exact directory layout may differ depending on the files included in the repository. Refer to the actual source files for the implementation.
 
-```bash
-python src/gharchive_pipeline.py --start 2026-10-18 --end 2026-10-18 --out data/raw
-```
+## Reproducibility
 
-Then extract features:
+To reproduce the analysis:
 
-```bash
-python src/gharchive_pipeline.py --features data/raw --out data/processed
-```
+1. Clone this repository.
+2. Set up a Python environment.
+3. Install the dependencies listed in `requirements.txt`, if available.
+4. Obtain the required public event archives.
+5. Run the preprocessing and feature-engineering scripts using the documented arguments.
+6. Execute the model comparison and sensitivity analyses.
+7. Compare the resulting outputs with the reported experimental results.
 
-Run a controlled synthetic sanity check (synthetic labels are not real-world ground truth):
+The results depend on the sampled event files, preprocessing rules, feature definitions, and model configuration. Confirm these details before attempting to reproduce the reported numbers.
 
-```bash
-python src/synthetic_benchmark.py --out reports/synthetic_benchmark.csv
-```
+## Limitations
 
-Read `literature_review.md` for the initial focused literature review and its limitations.
+This study has several limitations:
 
-Run anomaly detection on extracted actor-week rows:
+* The analysis uses a sparse sample of public GitHub events from a single date.
+* Public events do not capture all development activities.
+* Automated accounts remain in the dataset.
+* Some activity and transition features are highly correlated.
+* The real-data anomaly flags have no independently verified ground-truth labels.
+* Synthetic benchmark results do not establish real-world model performance.
+* Repository switching alone cannot establish distraction, productivity, stress, burnout, or cognitive load.
 
-```bash
-python src/train_anomaly_model.py --input data/processed/actor_week_features.csv --out reports
-```
+These limitations mean that the results should be interpreted as exploratory evidence about model behaviour on the observed data.
 
-The anomaly model is exploratory and unsupervised. It does not classify burnout. If there are too few actor-weeks, gather more dates or report that the sample is insufficient.
+## Future Work
 
-## Reproducibility checklist
-- Record the exact date range and downloaded file count.
-- Record missing/unavailable archives and parsing errors.
-- Preserve the random seed and package versions.
-- Do not mix the same actor-week across train/test splits if later building a supervised model.
-- Avoid interpreting UTC timestamps as the developer's local time.
-- Do not infer health status, work hours, or productivity from public events alone.
-- Add actual model outputs, plots, and limitations to the IEEE paper.
+Potential extensions include:
 
-## Outputs
-- `actor_week_features.csv`: feature table for observed public events.
-- `anomaly_scores.csv`: model scores and flags.
-- `proposal_checkpoint.md`: initial proposal record.
-- `progress_log.md`: dated development log; update it honestly.
-- `IEEE_paper_draft.docx`: structured paper draft with no fabricated results.
+* Collecting a longer and more continuous observation window.
+* Establishing a documented bot-filtering strategy.
+* Testing feature ablations to measure the contribution of individual features.
+* Comparing additional unsupervised anomaly-detection methods.
+* Evaluating flagged records using independent labels or a transparent human-review protocol.
+* Improving reproducibility by recording exact dependencies, parameters, and data provenance.
 
-## Network note
-The assistant runtime may not have direct access to download archives. Run the download command from your own computer if it fails in this environment. Record failed or missing hours; do not silently treat incomplete archives as complete data.
+## Research Paper
 
-## Current status (25 October 2026)
-- Unit tests: 2 passed.
-- Synthetic sanity check: completed; see `reports/synthetic_benchmark.csv` and `reports/RESULTS_TEMPLATE.md`.
-- Real GHArchive download and real-data evaluation: not completed in the assistant runtime because outbound network access is unavailable. Run the download locally and record actual coverage.
+The IEEE-format paper and its figures can be included in a `paper/` directory. If the LaTeX source is provided, compile it using Overleaf or a local LaTeX distribution.
+
+## References
+
+1. GH Archive, [The public GitHub timeline](https://www.gharchive.org/).
+2. F. T. Liu, K. M. Ting, and Z.-H. Zhou, "Isolation Forest," *Proceedings of the 8th IEEE International Conference on Data Mining*, 2008, pp. 413–422. https://doi.org/10.1109/ICDM.2008.17.
+3. E. Kalliamvakou et al., "The promises and perils of mining GitHub," *Proceedings of the 11th Working Conference on Mining Software Repositories*, 2014, pp. 92–101. https://doi.org/10.1145/2597073.2597074.
+4. M. M. Breunig, H.-P. Kriegel, R. T. Ng, and J. Sander, "LOF: Identifying density-based local outliers," *Proceedings of the ACM SIGMOD International Conference on Management of Data*, 2000, pp. 93–104. https://doi.org/10.1145/342009.335388.
+
+---
+
+**Author:** K. Sruthi
+**Institution:** VIT-AP University, Amaravati, India
+
+---
+
+*This repository is an academic research project. The findings describe exploratory anomaly detection on sampled public GitHub activity and should not be interpreted as validated measurements of individual developer behaviour.*
